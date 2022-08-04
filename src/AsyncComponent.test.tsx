@@ -1,24 +1,6 @@
 import * as React from "react";
-import { TouchableOpacity, Text } from "react-native";
 import TestRenderer, { act, ReactTestRenderer } from "react-test-renderer";
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const AsyncComponent = () => {
-  const [count, setCount] = React.useState(0);
-
-  const handlePress = () => {
-    setTimeout(() => setCount((c) => c + 1), 10);
-  };
-
-  return (
-    <TouchableOpacity onPress={handlePress}>
-      <Text testID="output">Count: {count}</Text>
-    </TouchableOpacity>
-  );
-};
+import { AsyncComponent } from "./AsyncComponent";
 
 test("Async action render count", async () => {
   let duration = 0;
@@ -44,7 +26,7 @@ test("Async action render count", async () => {
   expect(label.props.children).toEqual(["Count: ", 0]);
 
   await act(async () => {
-    const button = renderer.root.findByType(TouchableOpacity);
+    const button = renderer.root.findByProps({ testID: "button" });
     button.props.onPress();
     await sleep(100);
   });
@@ -56,6 +38,10 @@ test("Async action render count", async () => {
     renderer.unmount();
   });
 
-  console.log("Total", duration, count);
+  console.log(`Renders summary: count=${count}, duration=${duration}`);
   expect(count).toEqual(2);
 });
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
